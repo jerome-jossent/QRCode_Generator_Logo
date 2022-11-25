@@ -33,7 +33,7 @@ namespace QRCode
 {
     public partial class MainWindow : Window
     {
-        enum TypePoint {Carrée, Disque, Hexagone}
+        enum TypePoint { Carrée }//, Disque, Hexagone}
 
         #region Variables
         Properties.Settings __ = Properties.Settings.Default;
@@ -225,24 +225,24 @@ namespace QRCode
                             case TypePoint.Carrée:
                                 EmguQR_NB.Draw(new System.Drawing.Rectangle(x, y, diametre, diametre), blanc , thickness: -1);
                                 break;
-                            case TypePoint.Disque:
-                                EmguQR_NB.Draw(new CircleF(new PointF(x + paramètre, y + paramètre), paramètre), blanc, thickness: -1);
-                                break;
-                            case TypePoint.Hexagone:
+                            //case TypePoint.Disque:
+                            //    EmguQR_NB.Draw(new CircleF(new PointF(x + paramètre, y + paramètre), paramètre), blanc, thickness: -1);
+                            //    break;
+                            //case TypePoint.Hexagone:
 
-                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y, 1, 1), blanc, thickness: -1);
+                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y, 1, 1), blanc, thickness: -1);
 
-                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 1, y + 1, 5, 1), blanc, thickness: -1);
+                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 1, y + 1, 5, 1), blanc, thickness: -1);
 
-                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x, y + 2, 7, 3), blanc, thickness: -1);
+                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x, y + 2, 7, 3), blanc, thickness: -1);
                                 
-                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 1, y + 5, 5, 1), blanc, thickness: -1);
+                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 1, y + 5, 5, 1), blanc, thickness: -1);
 
-                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y + 6, 1, 1), blanc, thickness: -1);
+                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y + 6, 1, 1), blanc, thickness: -1);
 
-                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y + 3, 1, 1), new Gray(0) , thickness: -1);
+                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y + 3, 1, 1), new Gray(0) , thickness: -1);
                                 
-                                break;
+                            //    break;
                             default:
                                 break;
                         }
