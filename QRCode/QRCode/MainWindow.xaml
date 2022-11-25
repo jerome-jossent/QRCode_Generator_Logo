@@ -1,0 +1,60 @@
+﻿<Window x:Class="QRCode.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:qr="clr-namespace:Gma.QrCodeNet.Encoding.Windows.WPF;assembly=Gma.QrCodeNet.Encoding"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:QRCode"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="400" Width="525" Loaded="Window_Loaded" Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" >
+            <TextBox x:Name="tbx_text" Height="36" Margin="10,10,10,0" TextWrapping="Wrap" VerticalAlignment="Top" ToolTip="Message à coder" TextChanged="tbx_text_TextChanged"/>
+
+            <Label x:Name="label_Fond" Content="Fond :" HorizontalAlignment="Left" Height="23" Margin="10,52,0,0" VerticalAlignment="Top" Width="62"/>
+            <xctk:ColorPicker Name="cpk_fond" Height="30" Margin="8,80,0,0" VerticalAlignment="Top" ToolTip="Couleur du fond" HorizontalAlignment="Left" Width="67" Closed="cpk_fond_Closed"/>
+
+            <Label x:Name="label_Forme" Content="Forme :" HorizontalAlignment="Left" Height="23" Margin="81,52,0,0" VerticalAlignment="Top" Width="62"/>
+            <ComboBox x:Name="cbx_point" Height="30" Margin="80,80,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="67"/>
+            <xctk:IntegerUpDown Name="nud_taille" Minimum="0" Height="30" Margin="80,115,0,0" VerticalAlignment="Top" ToolTip="Facteur de taille des points" HorizontalAlignment="Left" Width="67" ValueChanged="nud_taille_ValueChanged" />
+
+            <RadioButton x:Name="rb_couleur" Content="couleur" HorizontalAlignment="Left" Height="21" Margin="155,58,0,0" VerticalAlignment="Top" Width="62" Checked="rb_couleur_Checked" IsChecked="True"/>
+            <xctk:ColorPicker Name="cpk_point" Height="30" Margin="155,80,0,0" VerticalAlignment="Top" ToolTip="Couleur des points" HorizontalAlignment="Left" Width="67" Closed="cpk_point_Closed"/>
+
+            <RadioButton x:Name="rb_image" Content="" HorizontalAlignment="Left" Height="19" Margin="228,58,0,0" VerticalAlignment="Top" Width="62" Checked="rb_image_Checked"/>
+            <Button x:Name="btn_point_image" Content="Image" Margin="248,50,0,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Left" Width="67" Click="btn_point_image_Click" IsEnabled="False" />
+            <Image x:Name="img_point_image" Stretch="Uniform" Height="100" Margin="230,86,0,0" VerticalAlignment="Top" StretchDirection="DownOnly" HorizontalAlignment="Left" Width="100"/>
+
+            <CheckBox x:Name="ckb_logo" Content="" HorizontalAlignment="Left" Height="19" Margin="343,55,0,0" VerticalAlignment="Top" Width="20" Checked="ckb_logo_Checked"/>
+            <Button x:Name="btn_logo" Content="Logo" Margin="368,51,0,0" VerticalAlignment="Top" Height="30" Click="btn_logo_Click" HorizontalAlignment="Left" Width="67" IsEnabled="False" />
+            <Image x:Name="img_logo" Stretch="Uniform" Height="100" Margin="335,86,0,0" VerticalAlignment="Top" StretchDirection="DownOnly" HorizontalAlignment="Left" Width="100"/>
+
+			<!--<Slider x:Name="sld_" Margin="343,158,82,0" />-->
+
+			<Button x:Name="btn_compute_qr" Content="Generate" Margin="440,51,10,0" VerticalAlignment="Top" Click="btn_generateQRCode" Height="66"/>
+            <Button x:Name="btn_save" Content="Save" Margin="440,122,10,0" VerticalAlignment="Top" Height="64" Click="btn_save_Click"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="0,10,0,0" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+				<Image Grid.Row="0" x:Name="img_QRCode" Stretch="Uniform" StretchDirection="DownOnly"/>
+			</Grid>
+            <TextBox Grid.Column="1" x:Name="tb" TextWrapping="Wrap" />
+        </Grid>
+
+    </Grid>
+</Window>

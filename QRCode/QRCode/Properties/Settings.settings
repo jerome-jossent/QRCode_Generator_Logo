@@ -1,0 +1,33 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="QRCode.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="chemin_logo" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="chemin_point_image" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="intervale_de_satisfaction" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.003</Value>
+    </Setting>
+    <Setting Name="couleur_point" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">227, 0, 27</Value>
+    </Setting>
+    <Setting Name="couleur_fond" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">254, 254, 254</Value>
+    </Setting>
+    <Setting Name="forme" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="txt" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="taille" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">7</Value>
+    </Setting>
+    <Setting Name="logo_facteur_de_surface" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.01</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
