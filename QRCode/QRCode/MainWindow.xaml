@@ -48,10 +48,9 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0" >
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="30" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-				<Image Grid.Row="0" x:Name="img_QRCode" Stretch="Uniform" StretchDirection="DownOnly"/>
+				<Image Grid.Row="0" x:Name="img_QRCode" VerticalAlignment="Center" Stretch="Uniform" StretchDirection="DownOnly"/>
 			</Grid>
             <TextBox Grid.Column="1" x:Name="tb" TextWrapping="Wrap" />
         </Grid>

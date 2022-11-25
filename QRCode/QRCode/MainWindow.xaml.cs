@@ -33,7 +33,7 @@ namespace QRCode
 {
     public partial class MainWindow : Window
     {
-        enum TypePoint { Carrée }//, Disque, Hexagone}
+        enum TypePoint { Carrée, Disque }
 
         #region Variables
         Properties.Settings __ = Properties.Settings.Default;
@@ -61,14 +61,25 @@ namespace QRCode
             cpk_fond.SelectedColor = System.Windows.Media.Color.FromArgb(255,
                 __.couleur_fond.R, __.couleur_fond.G, __.couleur_fond.B);
             cbx_point.ItemsSource = Enum.GetValues(typeof(TypePoint)).Cast<TypePoint>();
-            cbx_point.SelectedIndex = cbx_point.Items.Count-1;
+            cbx_point.SelectedIndex = cbx_point.Items.Count - 1;
             nud_taille.Value = __.taille;
             tbx_text.Text = __.txt;
+
+            //CvInvoke.NamedWindow("A0");
+            //CvInvoke.NamedWindow("A1");
+            //CvInvoke.NamedWindow("A2");
+
+            //CvInvoke.NamedWindow("B0");
+            //CvInvoke.NamedWindow("B1");
+            //CvInvoke.NamedWindow("B2");
+
+            //CvInvoke.NamedWindow("C0");
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Properties.Settings.Default.Save();
+            CvInvoke.DestroyAllWindows();
         }
 
 
@@ -84,7 +95,7 @@ namespace QRCode
             __.chemin_logo = ofd.FileName;
             img_logo.Source = BitmapToBitmapSource((Bitmap)System.Drawing.Image.FromFile(__.chemin_logo));
         }
-        
+
         private void rb_couleur_Checked(object sender, RoutedEventArgs e) { IHM_update(); }
         private void rb_image_Checked(object sender, RoutedEventArgs e) { IHM_update(); }
         private void ckb_logo_Checked(object sender, RoutedEventArgs e) { IHM_update(); }
@@ -110,7 +121,7 @@ namespace QRCode
             __.chemin_point_image = ofd.FileName;
             img_point_image.Source = BitmapToBitmapSource((Bitmap)System.Drawing.Image.FromFile(__.chemin_point_image));
         }
-        
+
         private void nud_taille_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             __.taille = (int)nud_taille.Value;
@@ -130,17 +141,17 @@ namespace QRCode
         {
             __.txt = tbx_text.Text;
         }
-        
+
         private void btn_generateQRCode(object sender, RoutedEventArgs e)
         {
             System.Drawing.Color Coul_point = ColorTOColor(cpk_point.SelectedColor);
             System.Drawing.Color Coul_fond = ColorTOColor(cpk_fond.SelectedColor);
             TypePoint forme = (TypePoint)cbx_point.SelectedItem;
 
-            im = QRCode_Generate(__.txt, 
-                Coul_point, 
-                Coul_fond, 
-                __.taille, 
+            im = QRCode_Generate(__.txt,
+                Coul_point,
+                Coul_fond,
+                __.taille,
                 forme,
                 logo_facteur_de_surface: 0.01);
             dessine(im);
@@ -161,7 +172,7 @@ namespace QRCode
         #endregion
 
         #region QR Code
-        private Bitmap QRCode_Generate(string TXT, System.Drawing.Color Coul_point, System.Drawing.Color Coul_fond, int paramètre, TypePoint typpt, string cheminlogo="", double logo_facteur_de_surface = 0.1, bool logo_facteur_de_surface_auto = true)
+        private Bitmap QRCode_Generate(string TXT, System.Drawing.Color Coul_point, System.Drawing.Color Coul_fond, int parametre, TypePoint typpt, string cheminlogo = "", double logo_facteur_de_surface = 0.1, bool logo_facteur_de_surface_auto = true)
         {
             bool QRCode_OK;
             Bitmap img;
@@ -175,94 +186,84 @@ namespace QRCode
             tb.AppendText(Code.Matrix.Width + " x " + Code.Matrix.Height + "\n");
             tb.ScrollToEnd();
 
-            int diametre = paramètre * 2 + 1;
+            int diametre = parametre * 2 + 1;
 
             Bgra coul = new Bgra(Coul_fond.B, Coul_fond.G, Coul_fond.R, Coul_fond.A);
             Bgra coul_pt = new Bgra(Coul_point.B, Coul_point.G, Coul_point.R, Coul_point.A);
-
-            Image<Gray, byte> EmguQR_NB = new Image<Gray, byte>(Code.Matrix.Width * diametre, Code.Matrix.Height * diametre);
+            int marge = parametre * 2;
+            Image<Gray, byte> EmguQR_NB = new Image<Gray, byte>(Code.Matrix.Width * diametre + marge, Code.Matrix.Height * diametre + marge);
             Gray blanc = new Gray(255);
 
-//            InputArray hexagone = null;
-//            System.Drawing.Point[] hexagone = null;
-//            VectorOfPoint vectorOfPoint = null;
-//            if (typpt == TypePoint.Hexagone)
-//            {
-//                hexagone = new System.Drawing.Point[]
-////                hexagone = new InputArray()
-//                {
-//                    new System.Drawing.Point(5, 0),
-//                    new System.Drawing.Point(10, 3),
-//                    new System.Drawing.Point(10, 6),
-//                    new System.Drawing.Point(5, 9),
-//                    new System.Drawing.Point(0, 6),
-//                    new System.Drawing.Point(0, 3)
-//                };
-//                vectorOfPoint = new VectorOfPoint(hexagone);
-
-//                VectorOfPoint testPoint = new VectorOfPoint();
-
-//                CvInvoke.ApproxPolyDP(vectorOfPoint, testPoint, 1.0, true);
-
-//                CvInvoke.NamedWindow("First");
-//                MCvScalar scalar = new MCvScalar(0);
-//                Mat blackMat = new Mat(originalImage.Size, DepthType.Cv8U, originalImage.NumberOfChannels);
-//                blackMat.SetTo(scalar);
-
-
-                //CvInvoke.Imshow("First", blackMat);
-//            }
-            
             //Points
             for (int X = 0; X <= Code.Matrix.Width - 1; X++)
                 for (int Y = 0; Y <= Code.Matrix.Height - 1; Y++)
                     if (Code.Matrix.InternalArray[X, Y])
                     {
-                        int x = X * diametre;
-                        int y = Y * diametre;
+                        int x = X * diametre + marge;
+                        int y = Y * diametre + marge;
                         switch (typpt)
                         {
                             case TypePoint.Carrée:
-                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x, y, diametre, diametre), blanc , thickness: -1);
+                                EmguQR_NB.Draw(new System.Drawing.Rectangle(x, y, diametre, diametre), blanc, thickness: -1);
                                 break;
-                            //case TypePoint.Disque:
-                            //    EmguQR_NB.Draw(new CircleF(new PointF(x + paramètre, y + paramètre), paramètre), blanc, thickness: -1);
-                            //    break;
-                            //case TypePoint.Hexagone:
 
-                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y, 1, 1), blanc, thickness: -1);
+                            case TypePoint.Disque:
+                                //EmguQR_NB.Draw(new CircleF(new PointF(x, y), (int)(parametre*1.5)), blanc, thickness: -1);
+                                EmguQR_NB.Draw(new CircleF(new PointF(x - parametre / 4, y - parametre / 4), (int)(parametre * 1.3)), blanc, thickness: -1);
+                                EmguQR_NB.Draw(new CircleF(new PointF(x - parametre / 4, y + parametre / 4), (int)(parametre * 1.3)), blanc, thickness: -1);
+                                EmguQR_NB.Draw(new CircleF(new PointF(x + parametre / 4, y - parametre / 4), (int)(parametre * 1.3)), blanc, thickness: -1);
+                                EmguQR_NB.Draw(new CircleF(new PointF(x + parametre / 4, y + parametre / 4), (int)(parametre * 1.3)), blanc, thickness: -1);
+                                break;
 
-                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 1, y + 1, 5, 1), blanc, thickness: -1);
-
-                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x, y + 2, 7, 3), blanc, thickness: -1);
-                                
-                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 1, y + 5, 5, 1), blanc, thickness: -1);
-
-                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y + 6, 1, 1), blanc, thickness: -1);
-
-                            //    EmguQR_NB.Draw(new System.Drawing.Rectangle(x + 3, y + 3, 1, 1), new Gray(0) , thickness: -1);
-                                
-                            //    break;
                             default:
                                 break;
                         }
                     }
 
             //convert NB to Color
+            Image<Gray, byte> EmguQR_dotwhite = EmguQR_NB.Clone();
+
+            EmguQR_NB = EmguQR_NB.Erode(1);
+
+
             EmguQR_NB = EmguQR_NB.Not();
-            Image<Bgra, Byte> mask = EmguQR_NB.Convert<Bgra, byte>();
-            Image<Bgra, Byte> fond=null;
-            
+
+
+            Image<Bgra, byte> mask = EmguQR_NB.Convert<Bgra, byte>();
+            Image<Bgra, byte> fond = null;
+
             if (rb_couleur.IsChecked == true)
-                fond = new Image<Bgra, byte>(mask.Width, mask.Height, ColorTOBgra(cpk_point.SelectedColor));
+            {
+                Bgra dot_color = ColorTOBgra(cpk_point.SelectedColor);
+                fond = new Image<Bgra, byte>(mask.Width, mask.Height, dot_color);
+            }
 
             if (rb_image.IsChecked == true)
                 fond = new Image<Bgra, byte>(__.chemin_point_image);
 
+
             fond = fond.Resize(mask.Width, mask.Height, Inter.Lanczos4);
             EmguImageCouleur = fond + mask;
 
-            Image<Bgra, Byte> EmguImageSortie = EmguImageCouleur;//.SmoothGaussian(3);
+            Image<Bgra, byte> mask_dots = EmguQR_dotwhite.Convert<Bgra, byte>();
+            Image<Bgra, byte> fond_dots = null;
+
+            Bgra fond_color = ColorTOBgra(cpk_fond.SelectedColor);
+            fond_dots = new Image<Bgra, byte>(mask.Width, mask.Height, fond_color);
+
+            fond_dots = fond_dots.Resize(mask_dots.Width, mask_dots.Height, Inter.Lanczos4);
+            Image<Bgra, Byte> EmguImageCouleur_temp;
+            EmguImageCouleur_temp = fond_dots + mask_dots;
+
+            Image<Bgra, byte> EmguImageSortie = EmguImageCouleur & EmguImageCouleur_temp;
+
+            //CvInvoke.Imshow("A0", fond);
+            //CvInvoke.Imshow("A1", mask);
+            //CvInvoke.Imshow("A2", EmguImageCouleur);
+            //CvInvoke.Imshow("B0", fond_dots);
+            //CvInvoke.Imshow("B1", mask_dots);
+            //CvInvoke.Imshow("B2", EmguImageCouleur_temp);
+            //CvInvoke.Imshow("C0", EmguImageSortie);
 
             //Test du QRCode
             img = EmguImageSortie.ToBitmap();
@@ -277,7 +278,7 @@ namespace QRCode
 
             //Ajout d'un logo
             if (ckb_logo.IsChecked == true && __.chemin_logo != "")
-            { 
+            {
                 do
                 {
                     img = EmguImageSortie.ToBitmap();
@@ -395,15 +396,15 @@ namespace QRCode
                             dejatester = true;
                             break;
                         }
-                    }                    
-                    val = dejatester?-1:0.001;
+                    }
+                    val = dejatester ? -1 : 0.001;
                 }
 
                 return val;
             }
             else
                 return valInit;
-        }   
+        }
 
         private bool needToTestMore(double intervale_de_satisfaction)
         {
@@ -433,7 +434,7 @@ namespace QRCode
                             strongerOK = t.facteur;
             return strongerOK;
         }
-        
+
         private double getlowerFailed()
         {
             //Trouver le résultat échec avec la valeur la plus faible
@@ -449,15 +450,7 @@ namespace QRCode
             return lowerFailed;
         }
         #endregion
-      
-        void dessine(Bitmap bmp)
-        {
-            BitmapSource bmps = BitmapToBitmapSource((Bitmap)bmp.Clone());
-            img_QRCode.Source = null;
-            img_QRCode.Source = bmps;
-            img_QRCode.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-        }
-        private static Action EmptyDelegate = delegate () { };
+
 
         #region Méthodes Caisse à outils
         public static System.Drawing.Color ColorTOColor(System.Windows.Media.Color? Couleur)
@@ -513,7 +506,7 @@ namespace QRCode
         {
             return (new Bitmap(imgToResize, size));
         }
-        
+
         private static void BitmapAddBitmap(Bitmap img, string chemin_logo, double logo_facteur_de_surface)
         {
             //Chargement de la petite image
@@ -525,13 +518,14 @@ namespace QRCode
             int h = (int)Math.Pow(s_qr_masque / r, 0.5);
             int w = (int)(h * r);
             logo = BitmapResize(logo, new System.Drawing.Size(w, h));
-           
+
             //on ajoute
             Graphics g = Graphics.FromImage(img);
             int left = (img.Width / 2) - (logo.Width / 2);
             int top = (img.Height / 2) - (logo.Height / 2);
-            g.DrawImage(logo, new System.Drawing.Point(left, top));            
+            g.DrawImage(logo, new System.Drawing.Point(left, top));
         }
+        #endregion
 
         #region "Emgu to WPF"
         [DllImport("gdi32")]
@@ -552,11 +546,16 @@ namespace QRCode
                 return bs;
             }
         }
+
+        private static Action EmptyDelegate = delegate () { };
+        void dessine(Bitmap bmp)
+        {
+            BitmapSource bmps = BitmapToBitmapSource((Bitmap)bmp.Clone());
+            img_QRCode.Source = null;
+            img_QRCode.Source = bmps;
+            img_QRCode.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+        }
         #endregion
-
-        #endregion
-
-
     }
 
     class test
