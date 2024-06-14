@@ -7,7 +7,8 @@
                 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -21,29 +22,36 @@
         <Grid Grid.Row="1" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
+            
             <Image Grid.Column="0" Source="{Binding bitmapsource, UpdateSourceTrigger=PropertyChanged}" 
-               Stretch="Uniform" MaxHeight="512" RenderOptions.BitmapScalingMode="Fant" />
-            <Image Grid.Column="1" Source="{Binding bitmapsource2, UpdateSourceTrigger=PropertyChanged}" 
-               Stretch="Uniform" MaxHeight="512" RenderOptions.BitmapScalingMode="Fant" />
+               Stretch="None" RenderOptions.BitmapScalingMode="Fant" />
 
-            <Grid Grid.Column="2" Margin="30">
+            <Grid Grid.Column="1" Margin="30">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel Orientation="Vertical" >
-
-
-                    <xctk:ColorPicker SelectedColor="{Binding color_1}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50"/>
-                    <xctk:ColorPicker SelectedColor="{Binding color_2}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50"/>
+                <StackPanel Grid.Row="0" Orientation="Vertical">
+                    <ComboBox x:Name="cbx_point" SelectionChanged="cbx_point_SelectionChanged"/>
+                    <xctk:IntegerUpDown Value="{Binding size}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="80"/>
+                    <xctk:ColorPicker SelectedColor="{Binding color_1}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="80"/>
+                    <xctk:ColorPicker SelectedColor="{Binding color_2}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="80"/>
                 </StackPanel>
 
-                <Button Grid.Row="3" Content="Save" Height="50" Width="80" Click="Button_Click"/>
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>                        
+                    <Button Grid.Row="0" Content="Logo" Click="Select_Logo_Click"/>
+                    <Image Grid.Row="1" Source="{Binding bitmapsource_logo}" RenderOptions.BitmapScalingMode="Fant"/>
+                </Grid>
+
+                <Button Grid.Row="2" Content="Save" Height="50" Width="80" Click="Save_Click"/>
             </Grid>
 
         </Grid>
