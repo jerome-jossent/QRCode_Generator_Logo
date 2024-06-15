@@ -18,5 +18,10 @@ namespace QRCode
             tested = false;
             resultat = false;
         }
+
+        public override string ToString()
+        {
+            return facteur.ToString("F3") + " → " + (resultat ? "OK :)" : "ko :(");
+        }
     }
 }

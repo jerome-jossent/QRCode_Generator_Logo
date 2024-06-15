@@ -7,7 +7,7 @@
                 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow" Height="500" Width="600"
         Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
@@ -24,20 +24,31 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            
-            <Image Grid.Column="0" Source="{Binding bitmapsource, UpdateSourceTrigger=PropertyChanged}" 
-               Stretch="None" RenderOptions.BitmapScalingMode="Fant" />
+            <Canvas Grid.Column="0">
+                <Canvas.Background>
+                    <ImageBrush ImageSource="/Images/damier.bmp" TileMode="Tile" Viewport="0,0,32,32" ViewportUnits="Absolute"  />
+                </Canvas.Background>
+                <Border BorderThickness="1" BorderBrush="#FF000000" >
+                    <Image Source="{Binding bitmapsource, UpdateSourceTrigger=PropertyChanged}" 
+                            Stretch="None" RenderOptions.BitmapScalingMode="Fant" />
+                </Border>
+            </Canvas>
 
             <Grid Grid.Column="1" Margin="30">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Orientation="Vertical">
                     <ComboBox x:Name="cbx_point" SelectionChanged="cbx_point_SelectionChanged"/>
-                    <xctk:IntegerUpDown Value="{Binding size}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="80"/>
+                    <xctk:IntegerUpDown Value="{Binding size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Minimum="1" Maximum="30"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center" Width="80"/>
+                    <Slider Value="{Binding size, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                            Minimum="1" Maximum="30"/>
                     <xctk:ColorPicker SelectedColor="{Binding color_1}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="80"/>
                     <xctk:ColorPicker SelectedColor="{Binding color_2}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="80"/>
                 </StackPanel>
@@ -46,12 +57,19 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>                        
-                    <Button Grid.Row="0" Content="Logo" Click="Select_Logo_Click"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0">
+                        <Button Content="Logo" Click="Select_Logo_Click"/>
+                        <CheckBox Content="Auto" IsChecked="{Binding logo_factor_auto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <xctk:DoubleUpDown Value="{Binding logo_factor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                           FormatString="F3" Increment=".001" Minimum="0.0001" Maximum="1" />
+                    </StackPanel>
                     <Image Grid.Row="1" Source="{Binding bitmapsource_logo}" RenderOptions.BitmapScalingMode="Fant"/>
                 </Grid>
 
                 <Button Grid.Row="2" Content="Save" Height="50" Width="80" Click="Save_Click"/>
+
+                <ListView Grid.Row="3" x:Name="_lv"/>
             </Grid>
 
         </Grid>

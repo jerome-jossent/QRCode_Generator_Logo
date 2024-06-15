@@ -37,6 +37,7 @@ using System.Reflection.Metadata;
 using System.Security.Policy;
 using QRCode;
 using OpenCvSharp.WpfExtensions;
+using System.Threading;
 
 namespace QRCode_Generator_Logo
 {
@@ -117,7 +118,7 @@ namespace QRCode_Generator_Logo
                 Compute();
             }
         }
-        System.Windows.Media.Color _color_1 = Colors.White;
+        System.Windows.Media.Color _color_1 = Colors.Transparent;
 
         public System.Windows.Media.Color color_2
         {
@@ -143,7 +144,35 @@ namespace QRCode_Generator_Logo
                 Compute();
             }
         }
-        int? _size = 13;
+        int? _size;
+
+        public bool? logo_factor_auto
+        {
+            get => _logo_factor_auto;
+            set
+            {
+                if (_logo_factor_auto == value) return;
+                _logo_factor_auto = value;
+                OnPropertyChanged();
+                if (_logo_factor_auto == true)
+                    Compute();
+            }
+        }
+        bool? _logo_factor_auto;
+
+        public double? logo_factor
+        {
+            get => _logo_factor;
+            set
+            {
+                if (_logo_factor == value) return;
+                _logo_factor = value;
+                OnPropertyChanged();
+                if (logo_factor_auto != true)
+                    Compute();
+            }
+        }
+        double? _logo_factor;
 
         #endregion
 
@@ -157,6 +186,7 @@ namespace QRCode_Generator_Logo
         {
             Init_IHM();
             Init_QRCodeEngines();
+            Init_Test();
         }
 
         void Init_IHM()
@@ -170,6 +200,15 @@ namespace QRCode_Generator_Logo
             // Initialiser le lecteur de QR code
             encoder = new Gma.QrCodeNet.Encoding.QrEncoder(Gma.QrCodeNet.Encoding.ErrorCorrectionLevel.H);
             decoder = new ZXing.Windows.Compatibility.BarcodeReader();
+        }
+
+        void Init_Test()
+        {
+            text_input = "Alors comme ca on cherche du texte avec des characteres speciaux ?!";
+            size = 5;
+            logo_factor_auto = true;
+            logo_factor = 1;
+            LoadLogo(@"D:\Mes Images\color_ring.png");
         }
 
         private void cbx_point_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -194,91 +233,19 @@ namespace QRCode_Generator_Logo
             //récupération de la matrice générée
             Gma.QrCodeNet.Encoding.BitMatrix qr_m = code.Matrix;
 
-            int taille_px = (int)size;
-            int diametre = taille_px * 2 + 1;
-            int marge = taille_px * 2;
+            Mat? qr_i = MatrixToQRImage(qr_m);
+            if (qr_i == null) return "";
 
-            Scalar couleur_fond = new Scalar(color_1.B, color_1.G, color_1.R, color_1.A);
-            Scalar couleur_mark = new Scalar(color_2.B, color_2.G, color_2.R, color_2.A);
-            //Mat qr_i = new Mat(qr_m.Height * diametre + marge, qr_m.Width * diametre + marge, MatType.CV_8UC4, couleur_fond);
-            Mat qr_i = new Mat(qr_m.Height * diametre, qr_m.Width * diametre, MatType.CV_8UC4, couleur_fond);
-
-            TypePoint typpt = (TypePoint)cbx_point.SelectedItem;
-
-            //Points
-            for (int x = 0; x < qr_m.Width; x++)
-                for (int y = 0; y < qr_m.Height; y++)
-                    if (qr_m[x, y])
-                    {
-                        int X = x * diametre;//+ marge;
-                        int Y = y * diametre;// + marge;
-                        DessinePoint(qr_i, typpt, X, Y, diametre, couleur_mark, taille_px);
-                    }
-
-            double logo_facteur_de_surface = 0.1;
-            double val;
-            tests = new List<Test>();
             Bitmap img;
-            bool logo_facteur_de_surface_auto = true;
-            bool onreboucle;
-            double intervale_de_satisfaction = 0.01;
 
             //Ajout d'un logo
             if (logo != null)
-            {
-                do
-                {
-                    img = qr_i.ToBitmap();
-
-                    val = nextValueToTest(logo_facteur_de_surface);
-                    if (val == -1)
-                    {
-                        //tb.AppendText("Echec");
-                        //messages.Add("Echec");
-                        break;
-                    }
-                    Test t = new Test(val);
-
-                    Bitmap_Tools.BitmapAddBitmap(img, logo, val);
-
-                    bool QRCode_OK = QRCode_Check(text_input, img, out string commentaires, "f=" + val);
-                    t.tested = true;
-                    t.resultat = QRCode_OK;
-                    tests.Add(t);
-
-                    //Disp(commentaires);
-                    //dessine(img);
-                    Display_QRCode(img);
-
-                    if (!logo_facteur_de_surface_auto)
-                        onreboucle = false;
-                    else
-                        onreboucle = needToTestMore(intervale_de_satisfaction);
-                } while (onreboucle);
-
-                if (tests[tests.Count - 1].resultat != true)
-                {
-                    img = qr_i.ToBitmap();
-                    val = getStrongerOK();
-                    if (val > 0)
-                    {
-                        Bitmap_Tools.BitmapAddBitmap(img, logo, val);
-                        bool QRCode_OK = QRCode_Check(text_input, img, out string commentaires, "f=" + val);
-                        //Disp(commentaires);
-                    }
-                    else
-                    {
-                        img = qr_i.ToBitmap();
-                        Display_QRCode(img);
-                    }
-                }
-            }
+                img = AddLogo(qr_i, logo);
             else
             {
                 img = qr_i.ToBitmap();
                 Display_QRCode(img);
             }
-
 
             string text_ouput;
             // Décoder le QR code à partir de l'image bitmap
@@ -294,6 +261,90 @@ namespace QRCode_Generator_Logo
                 _tbk_output.Background = new SolidColorBrush(Colors.Red);
             }
             return text_ouput;
+        }
+
+        Mat? MatrixToQRImage(Gma.QrCodeNet.Encoding.BitMatrix qr_m)
+        {
+            if (size == null) return null;
+
+            int taille_px = (int)size;
+            int diametre = taille_px * 2 + 1;
+            int marge = taille_px * 2;
+
+            Scalar couleur_fond = new Scalar(color_1.B, color_1.G, color_1.R, color_1.A);
+            Scalar couleur_mark = new Scalar(color_2.B, color_2.G, color_2.R, color_2.A);
+            Mat qr_i = new Mat(qr_m.Height * diametre + marge * 2, qr_m.Width * diametre + marge * 2, MatType.CV_8UC4, couleur_fond);
+            //Mat qr_i = new Mat(qr_m.Height * diametre, qr_m.Width * diametre, MatType.CV_8UC4, couleur_fond);
+
+            TypePoint typpt = (TypePoint)cbx_point.SelectedItem;
+
+            //Points
+            for (int x = 0; x < qr_m.Width; x++)
+                for (int y = 0; y < qr_m.Height; y++)
+                    if (qr_m[x, y])
+                    {
+                        int X = x * diametre + marge;
+                        int Y = y * diametre + marge;
+                        DessinePoint(qr_i, typpt, X, Y, diametre, couleur_mark, taille_px);
+                    }
+            return qr_i;
+        }
+
+        Bitmap AddLogo(Mat qr_i, Bitmap logo)
+        {
+            Bitmap img;
+            //double val;
+            tests = new List<Test>();
+            bool onreboucle;
+            double intervale_de_satisfaction = 0.01;
+            int iter = 0;
+            _lv.Items.Clear();
+            do
+            {
+                iter++;
+                img = qr_i.ToBitmap();
+                if (logo_factor_auto == true)
+                    logo_factor = NextValueToTest(1);
+                Title = "nbr iterations : " + iter;
+                if (logo_factor == null)
+                    break;
+
+                Test t = new Test((double)logo_factor);
+
+                Bitmap_Tools.BitmapAddBitmap(img, logo, (double)logo_factor);
+
+                bool QRCode_OK = QRCode_Check(text_input, img, out string commentaires, "f=" + logo_factor);
+                t.tested = true;
+                t.resultat = QRCode_OK;
+                tests.Add(t);
+                _lv.Items.Add(t.ToString());
+
+                Display_QRCode(img);
+
+                Thread.Sleep(00);
+
+                onreboucle = (logo_factor_auto != true) ? false : NeedToTestMore(intervale_de_satisfaction);
+
+            } while (onreboucle);
+
+            if (tests[tests.Count - 1].resultat != true || logo_factor_auto == false)
+            {
+                img = qr_i.ToBitmap();
+                if (logo_factor_auto == true)
+                    logo_factor = GetStrongerOK();
+                if (logo_factor != null)
+                {
+                    Bitmap_Tools.BitmapAddBitmap(img, logo, (double)logo_factor);
+                    bool QRCode_OK = QRCode_Check(text_input, img, out string commentaires, "f=" + logo_factor);
+                    //Disp(commentaires);
+                }
+                else
+                {
+                    img = qr_i.ToBitmap();
+                    Display_QRCode(img);
+                }
+            }
+            return img;
         }
 
         bool QRCode_Check(string TXT, Bitmap image, out string message, string param = "")
@@ -324,66 +375,66 @@ namespace QRCode_Generator_Logo
             return res;
         }
 
-        double nextValueToTest(double valInit)
+        double NextValueToTest(double valInit)
         {
-            double strongerOK = getStrongerOK();
-            double lowerFailed = getlowerFailed();
+            double? strongerOK = GetStrongerOK();
+            double? lowerFailed = GetlowerFailed();
 
-            if (strongerOK != -1 && lowerFailed != -1)
+            if (strongerOK != null && lowerFailed != null)
                 //alors on veut essayer entre les deux (dichotomie)
-                return (strongerOK + lowerFailed) / 2;
-            else if (strongerOK != -1)
+                return ((double)strongerOK + (double)lowerFailed) / 2;
+            else if (strongerOK != null)
             {
                 //alors on veut essayer +
-                double val = strongerOK + 0.05;
+                double val = (double)strongerOK + 0.05;
                 return val;
             }
-            else if (lowerFailed != -1)
+            else if (lowerFailed != null)
             {   //alors on veut essayer -
-                double val = lowerFailed - 0.05;
-                if (val < 0.0001)
-                {
-                    bool dejatester = false;
-                    foreach (Test item in tests)
-                    {
-                        if (item.facteur == 0.0001)
-                        {
-                            dejatester = true;
-                            break;
-                        }
-                    }
-                    val = dejatester ? -1 : 0.0001;
-                }
+                double val;//= (double)lowerFailed - 0.05;
+                           //if (val < 0.0001)
+                           //{
+                           //bool dejatester = false;
+                           //foreach (Test item in tests)
+                           //{
+                           //    if (item.facteur == 0.0001)
+                           //    {
+                           //        dejatester = true;
+                           //        break;
+                           //    }
+                           //}
+                           //val = dejatester ? 0.01 : 0.0001;
+                           //}
 
-                return val;
+                return (double)lowerFailed - 0.1;//val;
             }
             else
                 return valInit;
         }
 
-        bool needToTestMore(double intervale_de_satisfaction)
+        bool NeedToTestMore(double intervale_de_satisfaction)
         {
-            double strongerOK = getStrongerOK();
-            double lowerFailed = getlowerFailed();
+            double? strongerOK = GetStrongerOK();
+            double? lowerFailed = GetlowerFailed();
             //Si possible, on compare
-            if (strongerOK != -1 && lowerFailed != -1)
+            if (strongerOK != null && lowerFailed != null)
             {
-                double ecart = Math.Abs(lowerFailed - strongerOK);
+                double ecart = Math.Abs((double)lowerFailed - (double)strongerOK);
                 return (ecart > intervale_de_satisfaction);
             }
             else
                 return true;
         }
 
-        double getStrongerOK()
+        double? GetStrongerOK()
         {
             //Trouver le résultat OK avec la valeur la plus forte
-            double strongerOK = -1;
+            double? strongerOK = null;
 
             foreach (Test t in tests)
                 if (t.tested)
                     if (t.resultat == true)
-                        if (strongerOK == -1)
+                        if (strongerOK == null)
                             strongerOK = t.facteur;
                         else
                             if (strongerOK < t.facteur)
@@ -391,14 +442,14 @@ namespace QRCode_Generator_Logo
             return strongerOK;
         }
 
-        double getlowerFailed()
+        double? GetlowerFailed()
         {
             //Trouver le résultat échec avec la valeur la plus faible
-            double lowerFailed = -1;
+            double? lowerFailed = null;
             foreach (Test t in tests)
                 if (t.tested)
                     if (t.resultat == false)
-                        if (lowerFailed == -1)
+                        if (lowerFailed == null)
                             lowerFailed = t.facteur;
                         else
                             if (lowerFailed > t.facteur)
@@ -492,7 +543,12 @@ namespace QRCode_Generator_Logo
 
         void LoadLogo(FileInfo file)
         {
-            logo = new Bitmap(file.FullName);
+            LoadLogo(file.FullName);
+        }
+
+        void LoadLogo(string path)
+        {
+            logo = new Bitmap(path);
             bitmapsource_logo = Convert(logo);
             Compute();
         }
